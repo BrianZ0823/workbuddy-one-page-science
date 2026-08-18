@@ -1,0 +1,20 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.venv/
+
+# OS
+.DS_Store
+Thumbs.db
+
+# Local test artifacts (not part of the skill)
+*.zip
+test-*/
+
+# Editor
+.vscode/
+.idea/
+
+# git internals
+.git/

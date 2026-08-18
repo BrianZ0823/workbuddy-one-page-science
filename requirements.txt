@@ -1,0 +1,7 @@
+# PNG 渲染依赖（仅导出 PNG 时需要）
+playwright>=1.40
+
+# 备注：
+# - Windows 上若 Chromium 下载失败，脚本会自动改用系统 Edge（channel="msedge"）。
+# - 完整 Chromium 需额外执行：playwright install chromium
+# - 完全没有浏览器时，脚本会输出「浏览器打印 / 截图」的零依赖手动导出指引。

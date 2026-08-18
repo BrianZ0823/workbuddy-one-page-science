@@ -1,0 +1,337 @@
+<!DOCTYPE html>
+<!--
+  ============================================================================
+  一页纸科普 · 手账风 模板（base-template.html）
+  ----------------------------------------------------------------------------
+  用法：复制本文件 → 按"内容契约"填值 → 用浏览器/ WorkBuddy 预览 → 导出 PNG。
+
+  风格铁律（今天最终态）：
+    · 标题黑体(SimHei) / 正文雅黑(Microsoft YaHei,500) + Noto Sans SC 兜底
+    · 禁用圆圈数字：序号一律方形/圆角矩形标签或 1./2. 文字
+    · 便利贴(sticky-note)与总结框(summary-box)并排 flex，不遮挡
+    · 首页建议加 .cover 类，自动收紧标题/摘要/路径条/速览间距
+    · 中文必须 HTML/CSS 排版，绝不用 AI 生图承载中文
+    · 篇幅按内容定，不强行压一页；每卡含明确可操作信息
+    · 底部来源落款默认保留（用户要求去掉时移除，仅当次生效）
+
+  填值位置（搜索这些占位符）：
+    [栏目/品牌名]  [主标题]  [副标题]  [主题]  [金句≤20字]  [来源]
+    [图标]  [中文名]  [英文名]  [安装/操作方法]  [功能]  [场景]  [实操提示词]
+  添加卡片：复制一个 <article class="skill-card">…</article> 块即可（颜色自动轮换）。
+  添加页面：复制一个 <section class="page">…</section> 块，改页码。
+  ============================================================================
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>[主标题] · 一页纸科普</title>
+<link href="https://fonts.googleapis.com/css2?family=Noto+Sans+SC:wght@400;500;700;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --paper:#f7f3e8;            /* 暖米白纸（Hard lock 底色） */
+    --paper-dark:#efe9d8;
+    --ink:#2b2b2b;
+    --blue:#3b82f6;  --blue-dark:#2563eb;
+    --red:#e94e3a;   --red-dark:#c0392b;
+    --yellow:#ffe066;--yellow-dark:#f4d03f;
+    --green:#b8e986;--green-dark:#8bc34a;
+    --purple:#c084fc;
+    --orange:#ffb366;
+    --cyan:#5ac8fa;
+    --shadow:rgba(60,50,30,0.12);
+  }
+  *{box-sizing:border-box;}
+  body{
+    margin:0; padding:28px 16px;
+    background:#d4cfc0;
+    font-family:"Microsoft YaHei","Noto Sans SC","PingFang SC","Hiragino Sans GB","YouYuan","幼圆",sans-serif;
+    font-weight:500;
+    color:var(--ink); line-height:1.55;
+  }
+  .book{ width:820px; max-width:100%; margin:0 auto; }
+
+  /* 单页（Hard lock：竖版纸感比例、暖米白底、圆角阴影） */
+  .page{
+    position:relative; width:100%;
+    background:var(--paper); border-radius:8px;
+    box-shadow:0 18px 50px rgba(0,0,0,0.25);
+    padding:40px 40px 44px 70px; overflow:hidden; margin-bottom:24px;
+  }
+  /* 纸张纹理（SVG 噪点，手账纸质感） */
+  .page::before{
+    content:""; position:absolute; inset:0; opacity:0.35; pointer-events:none;
+    background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.5'/%3E%3C/svg%3E");
+  }
+  /* 左侧螺旋装订（手账本意象） */
+  .spiral{ position:absolute; left:12px; top:0; bottom:0; width:44px;
+    display:flex; flex-direction:column; justify-content:space-between;
+    padding:26px 0; pointer-events:none; }
+  .spiral-ring{ width:34px; height:14px; border:3px solid #3a3a3a; border-radius:50%;
+    box-shadow: inset 1px 1px 0 rgba(255,255,255,0.35), 2px 2px 0 rgba(0,0,0,0.15);
+    transform:rotate(-8deg); margin:9px 0;
+    background:linear-gradient(180deg,#555 0%,#222 100%); }
+  .spiral-line{ position:absolute; left:28px; top:0; bottom:0; width:3px;
+    background:repeating-linear-gradient(to bottom, rgba(0,0,0,0.06) 0px, rgba(0,0,0,0.06) 24px, transparent 24px, transparent 38px); }
+  .page-inner{ position:relative; z-index:1; }
+
+  /* ---------- 标题区 ---------- */
+  header{ position:relative; margin-bottom:18px; }
+  /* 封面页 tighter 版：减少首页留白 */
+  .page.cover{ padding-top:32px; padding-bottom:36px; }
+  .page.cover header{ margin-bottom:10px; }
+  .page.cover .brand{ margin-bottom:8px; }
+  .page.cover h1{ font-size:28px; line-height:1.15; }
+  .page.cover .handwrite-red{ font-size:17px; transform:rotate(-2deg); margin-left:5px; }
+  .page.cover .subtitle{ font-size:15px; line-height:1.4; }
+  .page.cover .summary-row{ margin:10px 0 12px; gap:12px; }
+  .page.cover .summary-box{ padding:12px 16px 12px 44px; border-radius:18px; }
+  .page.cover .summary-star{ width:30px; height:30px; left:12px; }
+  .page.cover .sticky-note{ width:190px; padding:12px 14px; line-height:1.5; }
+  .page.cover .path-bar{ padding:8px 14px; margin-bottom:12px; }
+  .page.cover .overview-title{ font-size:20px; margin-bottom:10px; }
+  .page.cover .overview-grid{ margin-bottom:12px; }
+  .page.cover .install-hint{ padding:12px 16px; }
+  .brand{
+    display:inline-flex; align-items:center; gap:8px;
+    background:#1a1a1a; color:#fff; padding:6px 14px; border-radius:20px;
+    font-size:13px; font-weight:700; margin-bottom:12px;
+  }
+  .brand svg{ width:18px; height:18px; }
+  .badge-new{
+    display:inline-block; background:var(--blue); color:#fff;
+    font-family:"SimHei","黑体","Noto Sans SC",sans-serif;
+    font-size:14px; padding:3px 10px; border-radius:6px;
+    transform:rotate(-6deg); box-shadow:2px 3px 0 rgba(0,0,0,0.15); margin-left:10px;
+  }
+  /* 主标题：黑体（Hard lock 字体类别，非卡通体） */
+  h1{
+    font-family:"SimHei","黑体","Noto Sans SC","Microsoft YaHei",sans-serif;
+    font-size:34px; margin:0 0 6px; letter-spacing:1px; line-height:1.18; color:var(--ink);
+  }
+  .subtitle{ font-size:18px; font-weight:700; color:#555; margin:0; line-height:1.5; }
+  .handwrite-red{
+    font-family:"SimHei","黑体","Noto Sans SC",sans-serif; color:var(--red);
+    font-size:26px; display:inline-block; transform:rotate(-3deg); margin-left:6px;
+  }
+
+  /* ---------- 便利贴 + 一句话总结（并排 flex，不遮挡） ---------- */
+  .summary-row{ display:flex; gap:16px; align-items:flex-start; margin:14px 0 16px; }
+  .summary-box{
+    position:relative; flex:1; background:#fff; border-radius:22px;
+    padding:18px 22px 18px 56px; box-shadow:0 6px 18px var(--shadow);
+    border:2px dashed #d6d0c0; font-size:15px; line-height:1.6;
+  }
+  .summary-star{ position:absolute; left:16px; top:50%; transform:translateY(-50%);
+    width:40px; height:40px; }
+  .summary-box strong{ font-family:"SimHei","黑体","Noto Sans SC",sans-serif;
+    font-size:19px; color:var(--red-dark); }
+  .sticky-note{
+    width:172px; background:var(--yellow); padding:14px 16px;
+    border-radius:2px 14px 2px 14px; box-shadow:4px 6px 14px rgba(0,0,0,0.18);
+    transform:rotate(2deg); font-size:14px; line-height:1.65; flex-shrink:0;
+  }
+  .sticky-note b{ color:var(--red-dark); }
+
+  /* ---------- 使用路径 ---------- */
+  .path-bar{ display:flex; align-items:center; justify-content:center; gap:6px;
+    flex-wrap:wrap; background:#fff; border-radius:30px; padding:12px 16px;
+    margin-bottom:16px; box-shadow:0 6px 16px var(--shadow); font-weight:700; font-size:14px; }
+  .path-bar .pa{ color:var(--blue-dark); font-weight:900; }
+  .path-step{ background:var(--paper); border:2px solid var(--ink); border-radius:16px; padding:6px 13px; }
+
+  /* ---------- 速览网格（首页用） ---------- */
+  .overview-title{ font-family:"SimHei","黑体","Noto Sans SC",sans-serif;
+    font-size:22px; margin:0 0 14px; display:flex; align-items:center; gap:8px; }
+  .overview-grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; margin-bottom:14px; }
+  .ov-item{ background:#fff; border-radius:14px; padding:10px 12px;
+    box-shadow:0 4px 10px var(--shadow); border-left:5px solid var(--blue); position:relative; }
+  .ov-item:nth-child(3n+1){ border-left-color:var(--blue); }
+  .ov-item:nth-child(3n+2){ border-left-color:var(--orange); }
+  .ov-item:nth-child(3n+3){ border-left-color:var(--green-dark); }
+  /* 序号：圆角矩形标签（禁用圆圈数字） */
+  .ov-no{ display:inline-flex; align-items:center; justify-content:center;
+    font-family:"SimHei","黑体","Noto Sans SC",sans-serif; min-width:22px; height:20px;
+    font-size:11px; font-weight:900; color:#fff; background:var(--ink);
+    border-radius:5px; margin-bottom:5px; padding:0 5px; }
+  .ov-item:nth-child(3n+1) .ov-no{ background:var(--blue); }
+  .ov-item:nth-child(3n+2) .ov-no{ background:var(--orange); }
+  .ov-item:nth-child(3n+3) .ov-no{ background:var(--green-dark); }
+  .ov-name{ font-weight:900; font-size:14px; line-height:1.3; }
+  .ov-en{ font-size:11px; color:#888; margin:1px 0 2px; }
+  .ov-desc{ font-size:12px; color:#555; line-height:1.4; }
+
+  .install-hint{ background:#fff; border-radius:18px; padding:16px 20px;
+    box-shadow:0 6px 16px var(--shadow); font-size:14px; line-height:1.6; border:2px solid var(--paper-dark); }
+  .install-hint b{ color:var(--blue-dark); }
+
+  /* ---------- 详情页头（大序号=左侧竖线文字，禁用圆圈） ---------- */
+  .page-head{ display:flex; align-items:center; gap:14px; margin-bottom:18px;
+    border-bottom:3px solid var(--paper-dark); padding-bottom:12px; }
+  .page-head .ph-no{ font-family:"SimHei","黑体","Noto Sans SC",sans-serif;
+    font-size:20px; font-weight:900; color:var(--blue-dark); flex-shrink:0;
+    padding-right:12px; border-right:3px solid var(--blue-dark); }
+  .page-head .ph-title{ font-family:"SimHei","黑体","Noto Sans SC",sans-serif;
+    font-size:26px; font-weight:900; margin:0; flex:1; }
+  .page-head .ph-sub{ font-size:13px; color:#666; background:var(--paper);
+    border:2px solid var(--paper-dark); border-radius:20px; padding:5px 12px; font-weight:700; }
+
+  /* ---------- 详情卡片网格（Hard lock：模块化 sticker-note 网格） ---------- */
+  .skill-grid{ display:grid; grid-template-columns:repeat(2,1fr); gap:14px; }
+  .skill-card{ background:#fff; border-radius:20px; padding:16px 16px 14px;
+    box-shadow:0 6px 16px var(--shadow); position:relative;
+    border-top:6px solid var(--blue); display:flex; flex-direction:column; }
+  .skill-card:nth-child(4n+1){ border-top-color:var(--blue); }
+  .skill-card:nth-child(4n+2){ border-top-color:var(--orange); }
+  .skill-card:nth-child(4n+3){ border-top-color:var(--green-dark); }
+  .skill-card:nth-child(4n+4){ border-top-color:var(--purple); }
+  .sc-head{ display:flex; align-items:center; gap:12px; margin-bottom:10px; }
+  .sc-icon{ width:52px; height:52px; border-radius:12px; display:flex;
+    align-items:center; justify-content:center; background:var(--paper);
+    border:2px solid var(--ink); flex-shrink:0; position:relative; font-size:26px; }
+  .sc-icon svg{ width:28px; height:28px; }
+  /* 序号：左上角圆角矩形小标签（禁用圆圈数字） */
+  .sc-no{ font-family:"SimHei","黑体","Noto Sans SC",sans-serif;
+    position:absolute; top:-8px; left:-8px; min-width:26px; height:22px; border-radius:6px;
+    background:var(--ink); color:#fff; font-size:12px; font-weight:900;
+    display:flex; align-items:center; justify-content:center; padding:0 6px;
+    border:2px solid #fff; box-shadow:0 3px 6px rgba(0,0,0,0.18); }
+  .skill-card:nth-of-type(4n+1) .sc-no{ background:var(--blue); }
+  .skill-card:nth-of-type(4n+2) .sc-no{ background:var(--orange); }
+  .skill-card:nth-of-type(4n+3) .sc-no{ background:var(--green-dark); }
+  .skill-card:nth-of-type(4n+4) .sc-no{ background:var(--purple); }
+  .sc-cn{ font-family:"SimHei","黑体","Noto Sans SC",sans-serif; font-size:20px; font-weight:900; line-height:1.25; }
+  .sc-en{ font-size:12px; color:#888; font-weight:700; margin-top:2px; }
+  .sc-install{ background:#eaf1ff; border:1px solid #c3d8ff; border-radius:12px;
+    padding:8px 11px; font-size:13px; font-weight:700; color:var(--blue-dark);
+    line-height:1.45; margin-bottom:9px; }
+  .sc-install .ic{ margin-right:4px; }
+  .sc-row{ font-size:14px; line-height:1.55; margin-bottom:7px; }
+  .sc-row b{ color:var(--ink); }
+  .sc-prompt{ margin-top:auto; background:var(--paper-dark); border-radius:12px; padding:9px 11px; position:relative; }
+  .sc-prompt-label{ display:inline-block; font-family:"SimHei","黑体","Noto Sans SC",sans-serif;
+    font-size:12px; color:var(--red-dark); background:#fff; border-radius:6px; padding:1px 8px; margin-bottom:5px; }
+  .sc-prompt code{ display:block; font-family:"Noto Sans SC",sans-serif; font-size:12.5px;
+    color:#444; line-height:1.5; white-space:normal; word-break:break-word; }
+
+  /* 收尾/全宽卡 */
+  .closing{ grid-column:1 / -1; background:#fff; border-radius:20px; padding:18px 22px;
+    box-shadow:0 6px 16px var(--shadow); font-size:15px; line-height:1.7; border-left:6px solid var(--green-dark); }
+  .closing b{ color:var(--green-dark); }
+
+  .page-num{ position:absolute; bottom:16px; right:20px;
+    font-family:"Microsoft YaHei","Noto Sans SC",sans-serif; font-size:17px; color:#999; transform:rotate(-3deg); }
+
+  @media print{
+    body{ background:#fff; padding:0; }
+    .page{ box-shadow:none; border-radius:0; margin-bottom:0; page-break-after:always; }
+    .page:last-child{ page-break-after:auto; }
+  }
+</style>
+</head>
+<body>
+<div class="book">
+
+  <!-- ============ 第 1 页：封面 + 速览（示例占位） ============ -->
+  <section class="page cover">
+    <div class="spiral"><div class="spiral-line"></div>
+      <!-- 螺旋环：按需重复约 16 个 -->
+      <div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div>
+    </div>
+    <div class="page-inner">
+      <header>
+        <div class="brand">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M8 12h8M12 8v8"/></svg>
+          [栏目/品牌名]
+          <span class="badge-new">NEW</span>
+        </div>
+        <h1>[主标题] <span class="handwrite-red">[关键词]</span></h1>
+        <p class="subtitle">[一句话副标题：本期讲清楚什么，拿来就能用。]</p>
+      </header>
+
+      <div class="summary-row">
+        <div class="summary-box">
+          <svg class="summary-star" viewBox="0 0 40 40"><path d="M20 2l4.5 13.5L38 20l-13.5 4.5L20 38l-4.5-13.5L2 20l13.5-4.5z" fill="#f4d03f" stroke="#2b2b2b" stroke-width="2"/></svg>
+          <strong>一句话</strong>：[用大白话概括本期核心结论，≤40字。]
+        </div>
+        <div class="sticky-note">
+          <b>怎么用？</b><br>
+          1. [第一步]<br>
+          2. [第二步]<br>
+          <b>[提醒]</b>
+        </div>
+      </div>
+
+      <div class="path-bar">
+        <span class="path-step">[环节1]</span><span class="pa">→</span>
+        <span class="path-step">[环节2]</span><span class="pa">→</span>
+        <span class="path-step">[环节3]</span><span class="pa">→</span>
+        <span class="path-step">[环节4]</span>
+      </div>
+
+      <div class="overview-title">📋 本期速览</div>
+      <div class="overview-grid">
+        <div class="ov-item"><span class="ov-no">01</span><div class="ov-name">[中文名]</div><div class="ov-en">[english-name]</div><div class="ov-desc">[一行说明，≤30字]</div></div>
+        <div class="ov-item"><span class="ov-no">02</span><div class="ov-name">[中文名]</div><div class="ov-en">[english-name]</div><div class="ov-desc">[一行说明，≤30字]</div></div>
+        <div class="ov-item"><span class="ov-no">03</span><div class="ov-name">[中文名]</div><div class="ov-en">[english-name]</div><div class="ov-desc">[一行说明，≤30字]</div></div>
+        <div class="ov-item"><span class="ov-no">04</span><div class="ov-name">[中文名]</div><div class="ov-en">[english-name]</div><div class="ov-desc">[一行说明，≤30字]</div></div>
+        <div class="ov-item"><span class="ov-no">05</span><div class="ov-name">[中文名]</div><div class="ov-en">[english-name]</div><div class="ov-desc">[一行说明，≤30字]</div></div>
+        <div class="ov-item"><span class="ov-no">06</span><div class="ov-name">[中文名]</div><div class="ov-en">[english-name]</div><div class="ov-desc">[一行说明，≤30字]</div></div>
+      </div>
+
+      <div class="install-hint">
+        <b>阅读建议：</b>[一句话说明怎么读/怎么用这份材料。]
+      </div>
+    </div>
+    <div class="page-num">第 1 / 共 2 页</div>
+  </section>
+
+  <!-- ============ 第 2 页：详情卡（示例占位，复制 .skill-card 增删） ============ -->
+  <section class="page">
+    <div class="spiral"><div class="spiral-line"></div>
+      <div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div><div class="spiral-ring"></div>
+    </div>
+    <div class="page-inner">
+      <div class="page-head">
+        <span class="ph-no">01–02</span>
+        <h2 class="ph-title">[本页主题]</h2>
+        <span class="ph-sub">[本页副标签]</span>
+      </div>
+      <div class="skill-grid">
+
+        <!-- 卡片示例：复制整个 <article> 块即可，顶部色条/序号颜色自动轮换 -->
+        <article class="skill-card">
+          <div class="sc-head">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#3b82f6" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="7"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg><span class="sc-no">01</span></div>
+            <div><div class="sc-cn">[中文名]</div><div class="sc-en">[english-name]</div></div>
+          </div>
+          <div class="sc-install"><span class="ic">🔧</span>安装：[明确方法，如"在技能市场搜索「名称」并安装"]</div>
+          <div class="sc-row"><b>做什么：</b>[一句话功能说明]</div>
+          <div class="sc-row"><b>何时用：</b>[适用场景]</div>
+          <div class="sc-prompt"><span class="sc-prompt-label">试试看</span><code>[一句可直接发给 WorkBuddy 的实操提示词]</code></div>
+        </article>
+
+        <article class="skill-card">
+          <div class="sc-head">
+            <div class="sc-icon"><svg viewBox="0 0 24 24" fill="none" stroke="#ff9800" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2L2 7l10 5 10-5-10-5z"/><path d="M2 17l10 5 10-5"/><path d="M2 12l10 5 10-5"/></svg><span class="sc-no">02</span></div>
+            <div><div class="sc-cn">[中文名]</div><div class="sc-en">[english-name]</div></div>
+          </div>
+          <div class="sc-install"><span class="ic">🔧</span>安装：[明确方法]</div>
+          <div class="sc-row"><b>做什么：</b>[一句话功能说明]</div>
+          <div class="sc-row"><b>何时用：</b>[适用场景]</div>
+          <div class="sc-prompt"><span class="sc-prompt-label">试试看</span><code>[一句可直接发给 WorkBuddy 的实操提示词]</code></div>
+        </article>
+
+      </div>
+
+      <!-- 收尾语（可选） -->
+      <div class="closing" style="margin-top:14px;">
+        <b>最后一句：</b>[用大白话收个尾，呼应本期主题。]
+      </div>
+    </div>
+    <div class="page-num">第 2 / 共 2 页</div>
+  </section>
+
+</div>
+</body>
+</html>
